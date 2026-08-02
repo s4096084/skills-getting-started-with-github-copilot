@@ -14,7 +14,31 @@ def reset_activities():
     activities.update(deepcopy(original_state))
 
 
-def test_unregister_participant_from_activity():
+def test_get_activities_returns_data():
+    client = TestClient(app)
+
+    response = client.get("/activities")
+
+    assert response.status_code == 200
+    assert "Chess Club" in response.json()
+    assert response.json()["Chess Club"]["participants"]
+
+
+def test_signup_for_activity_adds_participant():
+    client = TestClient(app)
+
+    response = client.post(
+        "/activities/Chess%20Club/signup?email=newstudent@mergington.edu"
+    )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == (
+        "Signed up newstudent@mergington.edu for Chess Club"
+    )
+    assert "newstudent@mergington.edu" in activities["Chess Club"]["participants"]
+
+
+def test_unregister_participant_removes_from_activity():
     client = TestClient(app)
 
     response = client.delete(
